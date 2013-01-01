@@ -84,7 +84,7 @@ class APP_User extends MOD_bw_user_Auth
      * @access private
      */
     private function _cookieLogin() 
-    {
+    {die('toto');
         if( !isset($_COOKIE) || !is_array($_COOKIE))
             return false;
         $env = PVars::getObj('env');
@@ -108,7 +108,7 @@ class APP_User extends MOD_bw_user_Auth
     
 
     private function _BWcookieLogin() 
-    {
+    {die('toto');
         if( !isset($_COOKIE) || !is_array($_COOKIE))
             return false;
             
@@ -307,6 +307,9 @@ WHERE `user_id` = '.(int)$userId.' AND `setting` = \''.$c->dao->escape($setting)
         return self::get()->loggedIn;
     }
     
+    
+    
+    
     /**
      * login getter
      * 
@@ -345,6 +348,9 @@ WHERE `user_id` = '.(int)$userId.' AND `setting` = \''.$c->dao->escape($setting)
 //			 MOD_log::get()->write("Login Failed for <b>".$handle."</b>","Login") ; // This is needed for debugging !
             return false;
         }
+        
+        
+        
         // depending on load...
         //self::getAllSettings($c->getId());
         return self::$_instance;

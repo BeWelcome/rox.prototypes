@@ -40,6 +40,41 @@ class LoginController extends RoxControllerBase
         $this->model = new LoginModel;
     }
 
+    private function callWelenApi( $welenAPIBaseUrl, $relativeUrl,
+    		$resultAsAssociativeArray = true, $username = null,
+    		$password = null) {
+    
+    	// Json URL which should be requested
+    	$json_url = $welenAPIBaseUrl . $relativeUrl;
+    
+    	if (!extension_loaded('curl')) {
+    		die('CURL extension not loaded!');
+    		return null;
+    	}
+    
+    	// initializing curl
+    	$ch = curl_init($json_url);
+    
+    	// configuring curl options
+    	if ($username == null || $password == null) {
+    		$options = array(CURLOPT_RETURNTRANSFER => true);
+    		// Setting curl options
+    		curl_setopt_array($ch, $options);
+    	} else {
+    		// use login/password authentication
+    		$options = array(CURLOPT_RETURNTRANSFER => true,
+    				CURLOPT_USERPWD => $username . ":" . $password);
+    		// Setting curl options
+    		curl_setopt_array($ch, $options);
+    	}
+    
+    	// Getting results
+    	$jsonResult = curl_exec($ch); // Getting jSON result string
+    
+    	// if $resultAsAssociativeArray, convert the result to array
+    	return (json_decode($jsonResult, $resultAsAssociativeArray));
+    }
+    
     public function loginCallback($args, $action, $mem_for_redirect)
     {
         $count = $action->count;
@@ -69,7 +104,6 @@ class LoginController extends RoxControllerBase
                 $errmsg = 'wrong password given for username '.$bw_member->Username;
             }
         } 
-
         if ($errmsg != '') {
 			$mem_for_redirect->errmsg = $errmsg;
 			// error message on top disabled. We're using a div inside the login-form instead!
@@ -104,6 +138,7 @@ class LoginController extends RoxControllerBase
                 } else {
                     if ($bw_member->Status != 'Active')
                     {
+                    	
                     echo '<div id="loginmessage_wrapper">';
                     echo '<div id="loginmessage">login successful</div>';
                     echo '</div>';
@@ -117,7 +152,14 @@ class LoginController extends RoxControllerBase
                     </script>
                     
                     <?
-                    }
+                    }else{
+						// login ok: try to preauthenticate to welen
+						
+						if (!$this->preauthenticateToWelen($bw_member)){
+							// FIXME TODO force Rox logout
+						}
+					}
+					
                     $this->model->setupBWSession($bw_member);
                     $this->model->setTBUserAsLoggedIn($tb_user);
                     if (!empty($post['r']) && $post['r']) { // member wants to stay logged in
@@ -125,9 +167,11 @@ class LoginController extends RoxControllerBase
                     }
                     if (isset($request[0]) && 'login' == $request[0]) {
                         $redirect_url = implode('/', array_slice($request, 1));
+                        
                         if (!empty($_SERVER['QUERY_STRING'])) {
                             $redirect_url .= '?'.$_SERVER['QUERY_STRING'];
                         }
+                        
                         return $redirect_url;
                     }
                 }
@@ -135,6 +179,81 @@ class LoginController extends RoxControllerBase
         }
     }
 
+    private function preauthenticateToWelen($bw_member){
+		
+		// login ok: try to preauthenticate to welen
+		$env = PVars::getObj('env');
+		$welen = PVars::getObj('welen');
+		$jsonResultArray = $this->callWelenApi($env->baseuri . $welen->welen_context . $welen->welen_api_context, $welen->welen_api_preauthenticate . '/' . $bw_member->Username);
+		
+		// read response status
+		if (is_array($jsonResultArray) && array_key_exists('status', $jsonResultArray)) {
+			$status = ($jsonResultArray['status']);
+		} else {
+			$status = null;
+		}
+		
+		if ($status == 'ok'){
+			// status ok: read response ticket
+			if (is_array($jsonResultArray) && array_key_exists('ticket', $jsonResultArray)) {
+				$ticket = ($jsonResultArray['ticket']);
+		
+				// set the ticket cookie
+				setcookie($env->cookie_prefix.$welen->welen_authentication_cookie_suffix, $ticket);
+				
+				$result = true;
+			} else {
+				// error in response
+				$result = false;
+			}
+				
+		}else{
+			// API call fails
+			$result = false;
+		}
+		
+		return $result;
+	}
+	
+	private function unauthenticateToWelen(){
+	
+		$result = false;
+
+		$welen = PVars::getObj('welen');
+		$env = PVars::getObj('env');
+		$cookieName = $env->cookie_prefix.$welen->welen_authentication_cookie_suffix;
+		
+		if( isset($_COOKIE[$cookieName])) {
+			// cookie fount: try to unauthenticate to welen
+			$jsonResultArray = $this->callWelenApi($env->baseuri . $welen->welen_context . $welen->welen_api_context, $welen->welen_api_unauthenticate . '/' . $_COOKIE[$cookieName]);
+
+			// read response status
+			if (is_array($jsonResultArray) && array_key_exists('status', $jsonResultArray)) {
+				$status = ($jsonResultArray['status']);
+				
+				if ($status == 'ok'){
+					// status ok
+					$result = true;
+					// remove the cookie
+					setcookie($cookieName, '', 1);
+				}else{
+					// API call fails
+					$result = false;
+				}
+				
+			} else {
+				// response format error
+				$result = false;
+			}
+			
+		}else{
+			// no cookie fount: do not unauthenticate to welen
+			$result = true;
+		}
+
+		return $result;
+	}
+    
     /**
      * displays a login page with a login widget
      *
@@ -144,11 +263,14 @@ class LoginController extends RoxControllerBase
     public function logIn()
     {
         $redirect_url = implode('/', array_slice($this->args_vars->request, 1));
+
         if (!empty($_SERVER['QUERY_STRING'])) {
             $redirect_url .= '?'.$_SERVER['QUERY_STRING'];
         }   
+        
         if ($this->getLoggedInMember())
         {
+        	die($redirect_url);
             $this->redirect($redirect_url);
         }
         return new LoginPage;
@@ -161,7 +283,12 @@ class LoginController extends RoxControllerBase
      */
     public function logOut()
     {
-        $this->model->logout();
+    	if ($this->unauthenticateToWelen()){
+			
+			// log out only if Welen logout succeed
+			$this->model->logout();
+		}
+        
         $this->redirectAbsolute($this->router->url('main_page'));
     }
 }

@@ -61,6 +61,19 @@
                 <li><a href="donate"><?=$words->get('DonateLink')?></a></li>
             </ul>
         </li>
+        <li><a href="about">Welen</a>
+            <ul>
+            <?php 
+            	$welen = PVars::getObj('welen');
+            	$env = PVars::getObj('welen');
+            	$welen_base_url = $env->baseuri . $welen->welen_context;
+            ?>
+            	<li><a href=<?=$welen_base_url?>>Public area</a></li>
+            <?php if ($logged_in) { ?>
+                <li><a href=<?=$welen_base_url?>/secured/private>Secured area</a></li>
+            <?php } ?>  
+            </ul>
+        </li>
         <? if (isset($volunteer) && $volunteer) { ?>
         <li><a href="volunteer"><?=$words->get('Volunteer')?></a>
             <?=$this->volunteerMenu() ?>
