@@ -260,8 +260,24 @@ WHERE
         if(isset($this->profile_language)) {
             return $this->profile_language;
         } else {
-            // if no language is set use English
-            $this->set_profile_language("en") ;
+            // check if current session language is a profile language
+            $found = false;
+            if (isset($_SESSION['IdMember'])) {
+                $memberId = intval($_SESSION['IdMember']);
+                $member = $this->createEntity('Member', $memberId);
+                $member->set_profile_languages();
+                $langs = $member->profile_languages;
+                foreach($langs as $lang) {
+                    $found = ($lang->ShortCode == $_SESSION['lang']);
+                    if ($found) break; 
+                }
+            }
+            if ($found) {
+                $this->set_profile_language($_SESSION['lang']);
+            } else {
+                // if no language is set use English
+                $this->set_profile_language("en");
+            }
             return $this->profile_language;
         }
     }
@@ -1048,7 +1064,12 @@ ORDER BY
             if (($words->mInTrad($Relation->Comment,$vars['profile_language'])!=$vars["RelationComment_".$Relation->id]) 
                 and (!empty($vars["RelationComment_".$Relation->id])))  {
 //              echo "Relation #".$Relation->id,"<br />", $words->mInTrad($Relation->Comment,$vars['profile_language']),"<br />",$vars['RelationComment_'.$Relation->id],"<br />" ;
-                $words->ReplaceInMTrad(strip_tags($vars["RelationComment_".$Relation->id]),"specialrelations.Comment", $Relation->id, $Relation->Comment, $IdMember);
+                $IdTrad = $words->ReplaceInMTrad(strip_tags($vars["RelationComment_".$Relation->id]),"specialrelations.Comment", $Relation->id, $Relation->Comment, $IdMember);
+                // Empty comments have trad id 0. Causing ReplaceInMTrad to create
+                // a new trad id and returning the new number.
+                if ($IdTrad != $Relation->id) {
+                    $m->update_relation($Relation->id, $IdTrad);
+                }
                 $this->logWrite("updating relation #".$Relation->id." Relation Confirmed=".$Relation->Confirmed, "Profile update");
             }
         }

@@ -488,5 +488,28 @@ class Group extends RoxEntityBase
         return $this->findByWhere("IdGeoname = '{$geo->getPKValue()}'" . (($local) ? " AND IsLocal = TRUE" : ''));
     }
 
+
+    /**
+     * find subgroups for a group
+     *
+     * @param int $group_id - id of the group
+     * @return mixed false or array of groups that are subgroups of the group
+     * @access public
+     */
+    public function findSubgroups($group_id, $offset = 0, $limit = null)
+    {
+        if (!is_numeric($group_id)) {
+            return false;
+        }
+        $where = "{$this->_table_name}.id IN  (
+SELECT sg.subgroup_id 
+FROM groups_subgroups as sg 
+WHERE sg.group_id = " . intval($group_id) . " AND sg.deletedby IS NULL
+ORDER BY group_id)";
+        
+        return $this->findByWhereMany($where, $offset, $limit);
+    }
+
+
 }
 

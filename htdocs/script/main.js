@@ -159,6 +159,7 @@ bwrox.selectScripts([
       "user/settings",
       "trip/create",
       "trip/edit",
+      "trip",
       "gallery/show/image",
       "message/write",
       "editmyprofile"

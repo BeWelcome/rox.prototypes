@@ -165,6 +165,7 @@ class GroupsBasePage extends PageWithActiveSkin
             if ($this->isGroupMember())
             {
                 $items[] = array('membersettings', 'groups/'.$group_id.'/membersettings', $words->getSilent('GroupMembersettings'));
+                $items[] = array('subgroupsettings', 'groups/'.$group_id.'/subgroupsettings', $words->getSilent('GroupSubgroups'));
             }
             if ($this->member && $this->member->hasPrivilege('GroupsController', 'GroupSettings', $this->group))
             {
@@ -177,8 +178,8 @@ class GroupsBasePage extends PageWithActiveSkin
     
     protected function getStylesheets() {
        $stylesheets = parent::getStylesheets();
-       $stylesheets[] = 'styles/css/minimal/screen/custom/groups.css';
-       $stylesheets[] = 'styles/css/minimal/screen/custom/forums.css?1';
+       $stylesheets[] = 'styles/css/minimal/screen/custom/groups.css?1';
+       $stylesheets[] = 'styles/css/minimal/screen/custom/forums.css?2';
        return $stylesheets;
     }
 
