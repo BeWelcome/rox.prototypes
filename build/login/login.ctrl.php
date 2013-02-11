@@ -184,7 +184,10 @@ class LoginController extends RoxControllerBase
 		// login ok: try to preauthenticate to welen
 		$env = PVars::getObj('env');
 		$welen = PVars::getObj('welen');
-		$jsonResultArray = $this->callWelenApi($env->baseuri . $welen->welen_context . $welen->welen_api_context, $welen->welen_api_preauthenticate . '/' . $bw_member->Username);
+		$welenApiBaseUrl = $env->baseuri . $welen->welen_context . $welen->welen_api_context;
+		$welenApiContext = $welen->welen_api_preauthenticate . '/' . $bw_member->Username;
+				
+		$jsonResultArray = $this->callWelenApi($welenApiBaseUrl, $welenApiContext);
 		
 		// read response status
 		if (is_array($jsonResultArray) && array_key_exists('status', $jsonResultArray)) {
@@ -198,8 +201,10 @@ class LoginController extends RoxControllerBase
 			if (is_array($jsonResultArray) && array_key_exists('ticket', $jsonResultArray)) {
 				$ticket = ($jsonResultArray['ticket']);
 		
+				$cookieName = $env->cookie_prefix.$welen->welen_authentication_cookie_suffix;
+				
 				// set the ticket cookie
-				setcookie($env->cookie_prefix.$welen->welen_authentication_cookie_suffix, $ticket);
+				setcookie($cookieName, $ticket);
 				
 				$result = true;
 			} else {

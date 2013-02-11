@@ -11,6 +11,8 @@ class ApiModel extends RoxModelBase
      */
     public function __construct() {
         parent::__construct();
+        
+        $this->words=new MOD_words ;
     }
 
     /**
@@ -27,7 +29,7 @@ class ApiModel extends RoxModelBase
         }
         return false;
     }
-
+    
     /**
      * Get all data for a member.
      *
@@ -450,5 +452,74 @@ class ApiModel extends RoxModelBase
         }
 
         return $memberData;
+    }
+        
+    /**
+     * Get GeonamesCache by geonamesId.
+     *
+     * @param string $geonamesId geonames id.
+     * @return GeonamesCache|false GeonamesCache entity object or false if geonames item not found
+     */
+    public function getGeoById($geonamesId) {
+		$geo = $this->createEntity('Geo')->findById($geonamesId);
+        if ($geo != false) {
+			return $geo;
+        }
+        return false;
+    }
+    
+    /**
+     * Get geonames data.
+     *
+     * @param Geo $geo Geo entity object.
+     * @return object Object containing geo data as properties.
+     */
+    public static function getGeoData(Geo $geo) {
+        // TODO: avoid translation links in ago() when in translate mode
+        // TODO: allow viewing of profile translations
+        $baseURL = PVars::getObj('env')->baseuri;
+        $languageId = 0;
+        $geoData = new stdClass;
+
+        // field : name : string : always
+        $geoData->geonames_id = $geo->geonameid;
+		$geoData->name = $geo->name;
+		$geoData->latitude = $geo->latitude;
+		$geoData->longitude = $geo->longitude;
+        $geoData->place_type = $geo->placeType();
+        
+        if ($geo->isCity()){
+			$geoData->country_name = $geo->getCountry()->name;
+			$geoData->region_name = $geo->getParent()->name;
+		}
+        
+        return $geoData;
+    }
+
+	public function getTranslation($code, $lang){
+		
+		$translation = $this->words->getInLang($code, $lang);
+		return $translation;
+	}
+	
+	/**
+     * Get translation data.
+     *
+     * @param Translation $geo translation entity object.
+     * @return object Object containing translation data as properties.
+     */
+    public static function getTranslationData($code, $lang, $translation) {
+        // TODO: avoid translation links in ago() when in translate mode
+        // TODO: allow viewing of profile translations
+        $baseURL = PVars::getObj('env')->baseuri;
+        $languageId = 0;
+        
+        $translationData = new stdClass;
+
+		$translationData->code = $code;
+		$translationData->lang = $lang;
+		$translationData->sentence = $translation;
+		
+        return $translationData;
     }
 }

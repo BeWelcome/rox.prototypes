@@ -99,3 +99,7 @@
     $this->addRoute('newsletter', 'newsletter', 'NewsletterController', 'index');
 
     $this->addRoute('api_member','api/v1/member/:username:\.:format:', 'ApiController', 'memberAction');
+    
+    $this->addRoute('api_geonames','api/v1/geonames/:geonamesId:\.:format:', 'ApiController', 'geonamesAction');
+
+    $this->addRoute('api_localize','api/v1/localize/:lang:/:code:\.:format:', 'ApiController', 'localizeAction');
