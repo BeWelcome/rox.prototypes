@@ -20,4 +20,32 @@ write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 */
 
+
+    /**
+     * @author mahouni
+     */
+
+    /**
+     * This page asks if the user wants to remove a related group
+     *
+     * @package Apps
+     * @subpackage RelatedGroups
+     */
+class GroupDeleteRelatedGroupPage extends GroupsBasePage
+{
+    protected function column_col3()
+    {
+        $words = $this->getWords();
+        $relatedgroups = $this->relatedgroups;
+        $group = $this->group;
+        require SCRIPT_BASE . "build/relatedgroups/templates/groupdeleterelatedgroup.column_col3.php";
+    }
+
+    protected function getSubmenuActiveItem() {
+        return 'relatedgroupsettings';
+    }
+
+}
+
+
 ?>

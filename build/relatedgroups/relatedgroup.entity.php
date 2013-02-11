@@ -25,15 +25,15 @@ Boston, MA  02111-1307, USA.
      */
 
     /**
-     * represents subgroup of a group
+     * represents related group of a group
      *
      * @package Apps
      * @subpackage Entities
      */
-class Subgroup extends RoxEntityBase
+class RelatedGroup extends RoxEntityBase
 {
 
-    protected $_table_name = 'groups_subgroups';
+    protected $_table_name = 'groups_related';
 
     public function __construct()
     {
@@ -43,75 +43,62 @@ class Subgroup extends RoxEntityBase
     /**
      * Check if a group id is connected with a group
      *
-     * @param object $subgroup - child group entity to check
+     * @param object $relatedgroup - child group entity to check
      * @param object $group - parent group entity to check
      * @access public
      * @return bool
      */
-    public function isSubgroup(Group $group, Group $subgroup)
+    public function isRelatedGroup(Group $group, Group $relatedgroup)
     {
-        if (!is_object($group) ||  !is_object($subgroup))
-        {
+        if (!is_object($group) ||  !is_object($relatedgroup)) {
             return false;
         }
-        $group_id = $group->getPKValue();
-        $subgroup_id = $subgroup->getPKValue();
-        $where_clause = "subgroup_id = '{$subgroup_id}' AND group_id = '{$group_id}' AND deletedby IS NULL";
-        if ($this->findByWhere($where_clause))
-        {
+        $groupId = $group->getPKValue();
+        $relatedgroupId = $relatedgroup->getPKValue();
+        $where_clause = "related_id = '{$relatedgroupId}' AND group_id = '{$groupId}' AND deletedby IS NULL";
+        if ($this->findByWhere($where_clause)) {
             return true;
-        }
-        else
-        {
+        } else {
             return false;
         }
     }
 
     /**
-     * Add a subgroup to a group
+     * Add a related group to a group
      *
-     * @param object $group - the group where the subgroup is added
-     * @param int $subgroup_id - id of the subgroup
+     * @param object $group - the group where the related group is added
+     * @param int $relatedgroupId - id of the related group
      * @access public
      */
-    public function AddSubgroup(Group $group, Group $subgroup, Member $member)
+    public function AddRelatedGroup(Group $group, Group $relatedgroup, Member $member)
     {
-        if (!is_object($group) || !is_object($subgroup) || !is_object($member))
-        {
+        if (!is_object($group) || !is_object($relatedgroup) || !is_object($member)) {
             return false;
         }
 
-        // only bother if subgroup is not already a subgroup       
-        if (!$this->isSubgroup($group, $subgroup))
-        {
+        // only bother if related group is not already a related group
+        if (!$this->isRelatedGroup($group, $relatedgroup)) {
             $this->group_id = $group->getPKValue();
-            $this->subgroup_id = $subgroup->getPKValue();
+            $this->related_id = $relatedgroup->getPKValue();
             $this->addedby = $member->getPKValue();
             //$this->created = date('Y-m-d H:i:s');
-            if ($this->group_id != $this->subgroup_id)
-            {
+            if ($this->group_id != $this->related_id) {
                 return $this->insert();
-            }
-            else
-            {
+            } else {
                 return false;
             }
-        }
-        else
-        {
+        } else {
             return false;
         }
     }
 
 
-    public function DeleteSubgroup(Member $member)
+    public function deleteRelatedGroup(Member $member)
     {
-        if (!$this->isLoaded())
-        {
+        if (!$this->isLoaded()) {
             return false;
         }
-        if (!is_object($member) && !is_numeric($member->getPKValue()))
-        {
+        if (!is_object($member) && !is_numeric($member->getPKValue())) {
             return false;
         }
         $this->ts = date('Y-m-d H:i:s');
@@ -122,51 +109,34 @@ class Subgroup extends RoxEntityBase
 
 
     /**
-     * return the history of subgroups of the group
+     * return the history of related groups of the group
      *
      * @param Group $group - Group object to get history of locations for
      * @access public
      * @return array
      */
-    public function getSubgroupsLog($group, $offset = 0, $limit = null)
+    public function getRelatedGroupsLog($group, $offset = 0, $limit = null)
     {
-        if (!is_object($group) && !is_numeric($group->getPKValue()))
-        {
+        if (!is_object($group) && !is_numeric($group->getPKValue())) {
             return false;
         }
-        $group_id = $group->getPKValue();
-        $where_clause = "group_id = '{$group_id}'";
+        $groupId = $group->getPKValue();
+        $where_clause = "group_id = '{$groupId}'";
         $this->sql_order = "ts DESC";
         $logs = $this->findByWhereMany($where_clause, $offset, $limit);
         foreach ($logs as &$log) {
-            $log->subgroup = $this->createEntity('Group', $log->subgroup_id);
-            if ($log->deletedby == "")
-            {
+            $log->relatedgroup = $this->createEntity('Group', $log->related_id);
+            if ($log->deletedby == "") {
                 $log->member = $this->createEntity('Member', $log->addedby);
-                $log->SubgroupAction = "AddedSubgroup";
+                $log->RelatedGroupAction = "AddedRelatedGroup";
             } else {
                 $log->member = $this->createEntity('Member', $log->deletedby);
-                $log->SubgroupAction = "RemovedSubgroup";
+                $log->RelatedGroupAction = "RemovedRelatedGroup";
             }
-            
         }
         return $logs;
-        
-
     }
 
-
-
-
 }
-
-
-
-
-
-
-
-
-
 
 

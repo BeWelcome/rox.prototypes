@@ -55,7 +55,7 @@ tinyMCE.init({
     elements: "topic_text",
     plugins : "advimage,preview,fullscreen,autolink",
     theme: "advanced",
-    content_css : "styles/css/minimal/screen/content_minimal.css?2",    
+    content_css : "styles/css/minimal/screen/content_minimal.css?3",    
     relative_urls:false,
     convert_urls:false,
     theme_advanced_buttons1: "bold,italic,underline,strikethrough,separator,bullist,numlist,separator,forecolor,backcolor,charmap,link,image,separator,preview,fullscreen",
@@ -118,9 +118,13 @@ if ($allow_title) { // New Topic
 ?>
         <div class="row">
             <label for="topic_title"><?php echo $words->getFormatted("forum_label_topicTitle"); ?></label><br />
-            <input type="text" style="width: 95%" name="topic_title" size="50" maxlength="200" id="topic_title" value="<?php
-            echo isset($vars['topic_title']) ? $words->fTrad($vars['IdTitle']) : '';
-            ?>" />
+            <?php 
+            $topic_titletrad = "";
+            if ( isset($vars['topic_title']) && isset($vars['IdTitle']) ) {
+                $topic_titletrad = $words->fTrad($vars['IdTitle']);
+            } 
+            ?>
+            <input type="text" style="width: 95%" name="topic_title" size="50" maxlength="200" id="topic_title" value="<?php echo $topic_titletrad; ?>" />
         </div> <!-- row -->
 <? } ?>
     <div class="row">

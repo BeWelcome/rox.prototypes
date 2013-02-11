@@ -7,7 +7,7 @@
      *     $this->addRoute(route_name, route_url, controller, method, callback);
      *         |               |            |         |           |
      * RequestRouter method    |            |         |           |
-     *       unique name of yor route       |         |           |
+     *       unique name of your route       |         |           |
      *                      the url you want to map   |           |
      *                              the controller to map to      |
      *                                   the method in the controller to map to
@@ -59,13 +59,12 @@
     $this->addRoute('groups_search','groups/search', 'GroupsController', 'search');
     $this->addRoute('groups_thumbimg','groups/thumbimg/:group_id:', 'GroupsController', 'thumbImg');
     
-    // subgroup routes
-    $this->addRoute('subgroup_select','groups/:group_id:/selectsubgroup', 'SubgroupsController', 'selectSubgroup');
-    $this->addRoute('subgroup_add','groups/:group_id:/addsubgroup/:subgroup_id:', 'SubgroupsController', 'addSubgroup');
-    $this->addRoute('subgroup_selectdelete','groups/:group_id:/selectdeletesubgroup', 'SubgroupsController', 'selectdeleteSubgroup');
-    $this->addRoute('subgroup_delete','groups/:group_id:/deletesubgroup/:subgroup_id:', 'SubgroupsController', 'deleteSubgroup');
-    $this->addRoute('subgroup_log','groups/:group_id:/subgroupsettings', 'SubgroupsController', 'showSubgroupLog');
-
+    // related groups routes
+    $this->addRoute('relatedgroup_select','groups/:group_id:/selectrelatedgroup', 'RelatedGroupsController', 'selectRelatedGroup');
+    $this->addRoute('relatedgroup_add','groups/:group_id:/addrelatedgroup/:related_id:', 'RelatedGroupsController', 'addRelatedGroup');
+    $this->addRoute('relatedgroup_selectdelete','groups/:group_id:/selectdeleterelatedgroup', 'RelatedGroupsController', 'selectdeleteRelatedGroup');
+    $this->addRoute('relatedgroup_delete','groups/:group_id:/deleterelatedgroup/:related_id:', 'RelatedGroupsController', 'deleteRelatedGroup');
+    $this->addRoute('relatedgroup_log','groups/:group_id:/relatedgroupsettings', 'RelatedGroupsController', 'showRelatedGroupLog');
 
     // member app routes
     $this->addRoute('members_profile_retired', 'retired', 'MembersController', 'retired');
@@ -93,9 +92,29 @@
     // admin activity routes
     $this->addRoute('admin_activity_overview', 'admin/activitylogs', 'AdminController', 'activityLogs');
 
-
+    // admin massmailing
+    $this->addRoute('admin_massmail', 'admin/massmail', 'AdminController', 'massmail');
+    $this->addRoute('admin_massmail_create', 'admin/massmail/create', 'AdminController', 'massmailcreate');
+    $this->addRoute('admin_massmail_details', 'admin/massmail/details/:id:', 'AdminController', 'massmaildetails');
+    $this->addRoute('admin_massmail_details_mailing', 'admin/massmail/details/:id:/:type:', 'AdminController', 'massmaildetailsmailing');
+    $this->addRoute('admin_massmail_details_mailing_pages', 'admin/massmail/details/:id:/:type:/page/:page:', 'AdminController', 'massmaildetailsmailing');
+    $this->addRoute('admin_massmail_edit', 'admin/massmail/edit/:id:', 'AdminController', 'massmailedit');
+    $this->addRoute('admin_massmail_enqueue', 'admin/massmail/enqueue/:id:', 'AdminController', 'massmailenqueue');
+    $this->addRoute('admin_massmail_unqueue', 'admin/massmail/unqueue/:id:', 'AdminController', 'massmailunqueue');
+    $this->addRoute('admin_massmail_getadminunits', 'admin/massmail/getadminunits/:countrycode:', 'AdminController', 'getadminunits');
+    $this->addRoute('admin_massmail_getplaces', 'admin/massmail/getplaces/:countrycode:/:adminunit:', 'AdminController', 'getplaces');
+    $this->addRoute('admin_massmail_trigger', 'admin/massmail/trigger/:id:', 'AdminController', 'massmailtrigger');
+    $this->addRoute('admin_massmail_untrigger', 'admin/massmail/untrigger/:id:', 'AdminController', 'massmailuntrigger');
     
-// Simple newsletter page
+    // admin treasurer routes
+    $this->addRoute('admin_treasurer_overview', 'admin/treasurer', 'AdminController', 'treasurerOverview');
+    $this->addRoute('admin_treasurer_add_donation', 'admin/treasurer/add', 'AdminController', 'treasurerEditCreateDonation');
+    $this->addRoute('admin_treasurer_edit_donation', 'admin/treasurer/edit/:id:', 'AdminController', 'treasurerEditCreateDonation');
+    $this->addRoute('admin_treasurer_campaign_start', 'admin/treasurer/campaign/start', 'AdminController', 'treasurerStartDonationCampaign');
+    $this->addRoute('admin_treasurer_campaign_stop', 'admin/treasurer/campaign/stop', 'AdminController', 'treasurerStopDonationCampaign');
+    $this->addRoute('admin_treasurer_overview', 'admin/treasurer', 'AdminController', 'treasurerOverview');
+
+    // Simple newsletter page
     $this->addRoute('newsletter', 'newsletter', 'NewsletterController', 'index');
 
     $this->addRoute('api_member','api/v1/member/:username:\.:format:', 'ApiController', 'memberAction');
