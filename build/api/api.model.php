@@ -31,6 +31,17 @@ class ApiModel extends RoxModelBase
     }
     
     /**
+     * Get language by id.
+     *
+     * @param string $languageId id of language.
+     * @return Language|false Language entity object or false if language not found.
+     */
+    public function getLanguageById($languageId) {
+        $language = $this->createEntity('Language')->findById($languageId);
+        return $language;
+    }
+    
+    /**
      * Get all data for a member.
      *
      * This method is a huge monolith, but should be seen as sort of an
@@ -51,7 +62,7 @@ class ApiModel extends RoxModelBase
      * @param Member $member Member entity object.
      * @return object Object containing member data as properties.
      */
-    public static function getMemberData(Member $member) {
+    public static function getMemberData(Member $member, Language $language) {
         // TODO: avoid translation links in ago() when in translate mode
         // TODO: allow viewing of profile translations
         $baseURL = PVars::getObj('env')->baseuri;
@@ -450,6 +461,12 @@ class ApiModel extends RoxModelBase
         if ($plannedTrips != '') {
             $memberData->plannedTrips = $plannedTrips;
         }
+        
+        // field : prefered language : object : always
+        $memberData->preferedLanguage = new stdClass;
+        $memberData->preferedLanguage->shortCode = $language->ShortCode;
+        $memberData->preferedLanguage->name = $language->Name;
+        $memberData->preferedLanguage->englishName = $language->EnglishName;
 
         return $memberData;
     }

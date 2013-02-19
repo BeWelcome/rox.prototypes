@@ -123,7 +123,10 @@ class ApiController extends RoxControllerBase
             $this->error('Member not found');
         } else {
             if ($member->isPublic()) {
-                $memberData = $this->_model->getMemberData($member);
+				
+				$language = $this->_model->getLanguageById($member->getPreference('PreferenceLanguage'));
+				
+                $memberData = $this->_model->getMemberData($member, $language);
                 $this->success($memberData);
             } else {
                 $this->error('Profile not public');
