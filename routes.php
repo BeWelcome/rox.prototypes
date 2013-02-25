@@ -122,3 +122,6 @@
     $this->addRoute('api_geonames','api/v1/geonames/:geonamesId:\.:format:', 'ApiController', 'geonamesAction');
 
     $this->addRoute('api_localize','api/v1/localize/:lang:/:code:\.:format:', 'ApiController', 'localizeAction');
+    
+    $this->addRoute('api_languages_list','api/v1/languages/list.:format:', 'ApiController', 'languagesAction');
+    

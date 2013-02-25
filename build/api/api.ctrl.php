@@ -150,27 +150,46 @@ class ApiController extends RoxControllerBase
             $this->success($geonamesData);
         }
     }
-    
-    
+
+
     /**
      * Geonames API action.
      *
      * Fetches data, checks permissions and initiates response.
      */
     public function localizeAction() {
+    	$this->checkFormat();
+    
+    	$code = $this->route_vars['code'];
+    	$lang = $this->route_vars['lang'];
+    
+    	$translation = $this->_model->getTranslation($code, $lang);
+    	if ($translation == false) {
+    		$this->error('Translation not found');
+    	} else {
+    		$translationData = $this->_model->getTranslationData($code, $lang, $translation);
+    		$this->success($translationData);
+    	}
+    }    
+    
+    /**
+     * Geonames API action.
+     *
+     * Fetches data, checks permissions and initiates response.
+     */
+    public function languagesAction() {
         $this->checkFormat();
         
-        $code = $this->route_vars['code'];
-        $lang = $this->route_vars['lang'];
-        
-        $translation = $this->_model->getTranslation($code, $lang);
-        if ($translation == false) {
-            $this->error('Translation not found');
+        $languages = $this->_model->getLanguages();
+        if ($languages == false) {
+            $this->error('Languages not found');
         } else {
-            $translationData = $this->_model->getTranslationData($code, $lang, $translation);
+            $translationData = $this->_model->getLanguagesData($languages);
             $this->success($translationData);
         }
     }
+    
+    
     
     /**
      * Fetch callback URL parameter.

@@ -539,4 +539,61 @@ class ApiModel extends RoxModelBase
 		
         return $translationData;
     }
+    
+    public function getLanguages(){
+    
+    	// FIXME: this is a copy from FlaglistModel, what is the right way to reuse this method?
+    
+    	$db_vars = PVars::getObj('config_rdbms');
+    	if (!$db_vars) {
+    		throw new PException('DB config error!');
+    	}
+    	$dao = PDB::get($db_vars->dsn, $db_vars->user, $db_vars->password);
+    
+    	$dbresult = $dao->query('
+			SELECT languages.*
+			FROM languages, words
+			WHERE languages.id = words.IdLanguage
+			AND words.code = \'WelcomeToSignup\'
+				ORDER BY FlagSortCriteria
+       	 ');
+    
+    	$languages = array();
+    	while ($row = $dbresult->fetch(PDB::FETCH_OBJ)) {
+    		$languages[] = $row;
+    	}
+    	return $languages;
+    
+    }
+    
+    /**
+     * Get languages data.
+     *
+     * @param $languages $language entity object.
+     * @return object Object containing $language data as properties.
+     */
+    public static function getLanguagesData($languages) {
+    	// TODO: avoid translation links in ago() when in translate mode
+    	// TODO: allow viewing of profile translations
+    	$baseURL = PVars::getObj('env')->baseuri;
+    	$languageId = 0;
+    
+    	$languageData = array();
+    	foreach($languages as $language) {
+    		$abbr = $language->ShortCode;
+    		$title = $language->Name;
+    	
+    		$languageData = new stdClass;
+    		
+    		$languageData->shortCode = $language->ShortCode;
+    		$languageData->wordCode = $language->WordCode;
+    		$languageData->englishName = $language->EnglishName;
+    		$languageData->name = $language->Name;
+    		$languageData->flagSortCriteria = $language->FlagSortCriteria;
+    		
+    		$languagesData[] = $languageData;
+    	}
+    
+    	return array('languages' => $languagesData);
+    }
 }
