@@ -47,6 +47,8 @@ class LoginController extends RoxControllerBase
     	// Json URL which should be requested
     	$json_url = $welenAPIBaseUrl . $relativeUrl;
     
+    	// die('URL:' . $json_url);
+    	
     	if (!extension_loaded('curl')) {
     		die('CURL extension not loaded!');
     		return null;

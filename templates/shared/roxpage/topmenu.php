@@ -51,8 +51,9 @@
 					$welen = PVars::getObj('welen');
 					$env = PVars::getObj('welen');
 					$welen_base_url = $env->baseuri . $welen->welen_context;
+					$welen_events_url = $welen_base_url . '/' . $_SESSION['lang'] . '/events/';
 				?>
-            	<li><a href=<?=$welen_base_url?>/events><?=$words->get('welen.events.menu.label')?></a></li>
+            	<li><a href="<?=$welen_events_url?>"><?=$words->get('welen.events.menu.label')?></a></li>
                 <li><a href="trip"><?=$words->get('Trips')?></a></li>
                 <li><a href="gallery"><?=$words->get('Gallery')?></a></li>
                 <li><a href="blog"><?=$words->get('Blogs')?></a></li>

@@ -172,6 +172,12 @@ class MOD_words
 		
 	} // end of AddWords
 	
+	public function findTraductionsByLanguageId($IdLanguage){
+		$sQuery="select * from words where IdLanguage=".$IdLanguage ;
+		$s = $this->_dao->query($sQuery);
+		return $s;
+	}
+	
     /**
      * Update a  word and log this action
 	 * @code: code of the new word

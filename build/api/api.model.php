@@ -40,7 +40,29 @@ class ApiModel extends RoxModelBase
         $language = $this->createEntity('Language')->findById($languageId);
         return $language;
     }
+
+    /**
+     * Get language by code.
+     *
+     * @param string $languageId id of language.
+     * @return Language|false Language entity object or false if language not found.
+     */
+    public function getLanguageByCode($languageCode) {
+    	
+    	// FIXME this should not be here
+    	
+    	$db_vars = PVars::getObj('config_rdbms');
+    	
+    	$dao = PDB::get($db_vars->dsn, $db_vars->user, $db_vars->password);
     
+    	$dbresult = $dao->query("SELECT id
+							FROM languages
+							WHERE ShortCode = '". mysql_real_escape_string($languageCode) ."'");
+    	
+    	$row = $dbresult->fetch(PDB::FETCH_OBJ);
+    	
+    	return $row;
+    }
     /**
      * Get all data for a member.
      *
@@ -467,7 +489,7 @@ class ApiModel extends RoxModelBase
         $memberData->preferedLanguage->shortCode = $language->ShortCode;
         $memberData->preferedLanguage->name = $language->Name;
         $memberData->preferedLanguage->englishName = $language->EnglishName;
-
+        
         return $memberData;
     }
         
@@ -506,8 +528,28 @@ class ApiModel extends RoxModelBase
         $geoData->place_type = $geo->placeType();
         
         if ($geo->isCity()){
-			$geoData->country_name = $geo->getCountry()->name;
-			$geoData->region_name = $geo->getParent()->name;
+			
+        	if ($geo->getCountry() != null){
+        		
+        		$countryData = new stdClass;
+        		
+        		$countryData->name = $geo->getCountry()->name;
+        		$countryData->geonames_id = $geo->getCountry()->geonameid;
+        		$countryData->code = $geo->getCountry()->fk_countrycode;
+        		
+        		$geoData->country = $countryData;
+        	}
+        	
+        	if ($geo->getParent() != null){
+        		
+        		$regionData = new stdClass;
+        		
+        		$regionData->name = $geo->getParent()->name;
+        		$regionData->geonames_id = $geo->getParent()->geonameid;
+        		$regionData->code = $geo->getParent()->fk_admincode;
+        		
+        		$geoData->region = $regionData;
+        	}
 		}
         
         return $geoData;
@@ -538,6 +580,47 @@ class ApiModel extends RoxModelBase
 		$translationData->sentence = $translation;
 		
         return $translationData;
+    }
+    
+    public function getTranslations($languageCode){
+		
+    	$language = $this->getLanguageByCode($languageCode);
+    	
+		if ($language != null){
+			$translations = $this->words->findTraductionsByLanguageId($language->id);
+		}else{
+			$translations = false;
+		}
+		
+		return $translations;
+	}
+	
+	/**
+     * Get translationd data.
+     *
+     * @param Translation $geo translation entity object.
+     * @return object Object containing translation data as properties.
+     */
+    public static function getTranslationsData($lang, $translations) {
+    	// TODO: avoid translation links in ago() when in translate mode
+    	// TODO: allow viewing of profile translations
+    	$baseURL = PVars::getObj('env')->baseuri;
+    	$languageId = 0;
+    
+    	$translationsData = array();
+    	foreach($translations as $translation) {
+    		$translationData = new stdClass;
+    	
+    		$translationData->roxId = $translation->id;
+    		$translationData->key = $translation->code;
+    		$translationData->value = $translation->Sentence;
+    		$translationData->updatedDate = $translation->updated;
+    		$translationData->description = $translation->Description;
+    		
+    		$translationsData[] = $translationData;
+    	}
+    
+    	return array('lang' => $lang, 'values' => $translationsData);;
     }
     
     public function getLanguages(){

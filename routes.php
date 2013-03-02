@@ -125,3 +125,5 @@
     
     $this->addRoute('api_languages_list','api/v1/languages/list.:format:', 'ApiController', 'languagesAction');
     
+    $this->addRoute('api_translations_list','api/v1/translations/:lang:\.:format:', 'ApiController', 'translationsAction');
+    

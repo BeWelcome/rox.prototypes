@@ -30,6 +30,7 @@ require_once "footer.helper.php";
     <p><?php echo $languageSelector; ?></p>
 
     <?php translator_block() ?>
+    
   </div>
 
   <p>
