@@ -91,7 +91,7 @@ class RoxFrontRouter
             } else {
                 $urlheader="www" ;
             }
-            if ($urlheader!='www') {
+            if ($urlheader!='www' and $urlheader!='alpha') {
                 if ($trylang = $Model->getPossibleUrlLanguage($urlheader) ) {
                     $_SESSION['lang'] = $trylang->ShortCode;
                     $_SESSION['IdLanguage'] = $trylang->id;
@@ -109,14 +109,14 @@ class RoxFrontRouter
             if ($this->setLanguageByBrowser()) { 
                 return;
             }
-            return ;
         }
-       	
+
         if (!isset ($_SESSION['lang'])) {
             $_SESSION['lang'] = 'en';
             $_SESSION['IdLanguage'] = 0;
-        }	
-	return ;
+        }
+       
+        return;
     } // end of setLanguage
 
     protected function setLanguageByBrowser()
