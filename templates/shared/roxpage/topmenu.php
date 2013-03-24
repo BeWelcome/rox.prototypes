@@ -45,6 +45,7 @@
         </li>
         <li><a href="explore"><?=$words->get('Explore')?></a>
             <ul>
+                <li><a href="events"><?=$words->get('Events')?></a></li>
                 <li><a href="forums"><?=$words->get('Community')?></a></li>
                 <li><a href="groups"><?=$words->get('Groups')?></a></li>
                 <li><a href="trip"><?=$words->get('Trips')?></a></li>
